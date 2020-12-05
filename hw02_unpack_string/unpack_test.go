@@ -52,9 +52,83 @@ func TestUnpack(t *testing.T) {
 	}
 }
 
-func TestUnpackWithEscape(t *testing.T) {
-	t.Skip() // NeedRemove if task with asterisk completed
+func TestUnpackWithUpper(t *testing.T) {
+	for _, tst := range [...]test{
+		{
+			input:    "ASD",
+			expected: "ASD",
+		},
+		{
+			input:    "A3D0",
+			expected: "AAA",
+		},
+		{
+			input:    "3A",
+			expected: "",
+			err:      ErrInvalidString,
+		},
+		{
+			input:    "SSS3S",
+			expected: "SSSSSS",
+		},
+	} {
+		result, err := Unpack(tst.input)
+		require.Equal(t, tst.err, err)
+		require.Equal(t, tst.expected, result)
+	}
+}
 
+func TestUnpackWithSpecialChars(t *testing.T) {
+	for _, tst := range [...]test{
+		{
+			input:    `\\3`,
+			expected: `\\\`,
+		},
+		{
+			input:    "a\n3abc",
+			expected: "a\n\n\nabc",
+		},
+		{
+			input:    "a\t2b",
+			expected: "a\t\tb",
+		},
+		{
+			input:    "n2\n2n",
+			expected: "nn\n\nn",
+		},
+	} {
+		result, err := Unpack(tst.input)
+		require.Equal(t, tst.err, err)
+		require.Equal(t, tst.expected, result)
+	}
+}
+
+func TestUnpackWithLanguages(t *testing.T) {
+	for _, tst := range [...]test{
+		{
+			input:    "山3",
+			expected: "山山山",
+		},
+		{
+			input:    "montañ3a0",
+			expected: "montañññ",
+		},
+		{
+			input:    "جبل4",
+			expected: "جبلللل",
+		},
+		{
+			input:    "ภูเขา2",
+			expected: "ภูเขาา",
+		},
+	} {
+		result, err := Unpack(tst.input)
+		require.Equal(t, tst.err, err)
+		require.Equal(t, tst.expected, result)
+	}
+}
+
+func TestUnpackWithEscape(t *testing.T) {
 	for _, tst := range [...]test{
 		{
 			input:    `qwe\4\5`,
@@ -71,6 +145,11 @@ func TestUnpackWithEscape(t *testing.T) {
 		{
 			input:    `qwe\\\3`,
 			expected: `qwe\3`,
+		},
+		{
+			input:    `qw\ne`,
+			expected: "",
+			err:      ErrInvalidString,
 		},
 	} {
 		result, err := Unpack(tst.input)
