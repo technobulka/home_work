@@ -81,6 +81,10 @@ func TestUnpackWithUpper(t *testing.T) {
 func TestUnpackWithSpecialChars(t *testing.T) {
 	for _, tst := range [...]test{
 		{
+			input:    `a\`,
+			expected: "a",
+		},
+		{
 			input:    `\\3`,
 			expected: `\\\`,
 		},
@@ -93,8 +97,17 @@ func TestUnpackWithSpecialChars(t *testing.T) {
 			expected: "a\t\tb",
 		},
 		{
-			input:    "n2\n2n",
-			expected: "nn\n\nn",
+			input:    "³3",
+			expected: "³³³",
+		},
+		{
+			input:    "#16",
+			expected: "",
+			err:      ErrInvalidString,
+		},
+		{
+			input:    "=8=8",
+			expected: "================",
 		},
 	} {
 		result, err := Unpack(tst.input)
