@@ -15,7 +15,7 @@ func Unpack(s string) (string, error) {
 	var escape bool
 	var b strings.Builder
 
-	for _, char := range []rune(s) {
+	for _, char := range s {
 		if char == 92 && !escape {
 			escape = true
 		} else if !unicode.IsDigit(char) || escape {
