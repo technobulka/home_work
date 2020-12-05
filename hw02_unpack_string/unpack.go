@@ -18,7 +18,10 @@ func Unpack(s string) (string, error) {
 	for _, char := range s {
 		if char == 92 && !escape {
 			escape = true
-		} else if !unicode.IsDigit(char) || escape {
+			continue
+		}
+
+		if !unicode.IsDigit(char) || escape {
 			if letter != "" {
 				b.WriteString(strings.Repeat(letter, 1))
 			}
@@ -29,7 +32,10 @@ func Unpack(s string) (string, error) {
 
 			letter = string(char)
 			escape = false
-		} else if unicode.IsDigit(char) {
+			continue
+		}
+
+		if unicode.IsDigit(char) {
 			if letter == "" {
 				return "", ErrInvalidString
 			}
