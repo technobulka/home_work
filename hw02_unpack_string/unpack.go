@@ -2,7 +2,6 @@ package hw02_unpack_string //nolint:golint,stylecheck
 
 import (
 	"errors"
-	"log"
 	"strconv"
 	"strings"
 	"unicode"
@@ -41,8 +40,9 @@ func Unpack(s string) (string, error) {
 			}
 
 			d, err := strconv.Atoi(string(char))
+
 			if err != nil {
-				log.Fatal(err)
+				return "", ErrInvalidString
 			}
 
 			b.WriteString(strings.Repeat(letter, d))

@@ -13,7 +13,7 @@ type test struct {
 }
 
 func TestUnpack(t *testing.T) {
-	for _, tst := range [...]test{
+	tests := []test{
 		{
 			input:    "a4bc2d5e",
 			expected: "aaaabccddddde",
@@ -45,15 +45,21 @@ func TestUnpack(t *testing.T) {
 			input:    "aaa0b",
 			expected: "aab",
 		},
-	} {
-		result, err := Unpack(tst.input)
-		require.Equal(t, tst.err, err)
-		require.Equal(t, tst.expected, result)
+	}
+
+	for _, tst := range tests {
+		tst := tst
+
+		t.Run(tst.input, func(t *testing.T) {
+			result, err := Unpack(tst.input)
+			require.Equal(t, tst.err, err)
+			require.Equal(t, tst.expected, result)
+		})
 	}
 }
 
 func TestUnpackWithUpper(t *testing.T) {
-	for _, tst := range [...]test{
+	tests := []test{
 		{
 			input:    "ASD",
 			expected: "ASD",
@@ -71,15 +77,20 @@ func TestUnpackWithUpper(t *testing.T) {
 			input:    "SSS3S",
 			expected: "SSSSSS",
 		},
-	} {
-		result, err := Unpack(tst.input)
-		require.Equal(t, tst.err, err)
-		require.Equal(t, tst.expected, result)
+	}
+
+	for _, tst := range tests {
+		tst := tst
+		t.Run(tst.input, func(t *testing.T) {
+			result, err := Unpack(tst.input)
+			require.Equal(t, tst.err, err)
+			require.Equal(t, tst.expected, result)
+		})
 	}
 }
 
 func TestUnpackWithSpecialChars(t *testing.T) {
-	for _, tst := range [...]test{
+	tests := []test{
 		{
 			input:    `a\`,
 			expected: "a",
@@ -109,15 +120,20 @@ func TestUnpackWithSpecialChars(t *testing.T) {
 			input:    "=8=8",
 			expected: "================",
 		},
-	} {
-		result, err := Unpack(tst.input)
-		require.Equal(t, tst.err, err)
-		require.Equal(t, tst.expected, result)
+	}
+
+	for _, tst := range tests {
+		tst := tst
+		t.Run(tst.input, func(t *testing.T) {
+			result, err := Unpack(tst.input)
+			require.Equal(t, tst.err, err)
+			require.Equal(t, tst.expected, result)
+		})
 	}
 }
 
 func TestUnpackWithLanguages(t *testing.T) {
-	for _, tst := range [...]test{
+	tests := []test{
 		{
 			input:    "山3",
 			expected: "山山山",
@@ -134,15 +150,20 @@ func TestUnpackWithLanguages(t *testing.T) {
 			input:    "ภูเขา2",
 			expected: "ภูเขาา",
 		},
-	} {
-		result, err := Unpack(tst.input)
-		require.Equal(t, tst.err, err)
-		require.Equal(t, tst.expected, result)
+	}
+
+	for _, tst := range tests {
+		tst := tst
+		t.Run(tst.input, func(t *testing.T) {
+			result, err := Unpack(tst.input)
+			require.Equal(t, tst.err, err)
+			require.Equal(t, tst.expected, result)
+		})
 	}
 }
 
 func TestUnpackWithEscape(t *testing.T) {
-	for _, tst := range [...]test{
+	tests := []test{
 		{
 			input:    `qwe\4\5`,
 			expected: `qwe45`,
@@ -164,9 +185,14 @@ func TestUnpackWithEscape(t *testing.T) {
 			expected: "",
 			err:      ErrInvalidString,
 		},
-	} {
-		result, err := Unpack(tst.input)
-		require.Equal(t, tst.err, err)
-		require.Equal(t, tst.expected, result)
+	}
+
+	for _, tst := range tests {
+		tst := tst
+		t.Run(tst.input, func(t *testing.T) {
+			result, err := Unpack(tst.input)
+			require.Equal(t, tst.err, err)
+			require.Equal(t, tst.expected, result)
+		})
 	}
 }
