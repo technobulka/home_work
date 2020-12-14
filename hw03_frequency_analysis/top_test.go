@@ -7,7 +7,7 @@ import (
 )
 
 // Change to true if needed
-var taskWithAsteriskIsCompleted = false
+var taskWithAsteriskIsCompleted = true
 
 var text = `Как видите, он  спускается  по  лестнице  вслед  за  своим
 	другом   Кристофером   Робином,   головой   вниз,  пересчитывая
@@ -57,4 +57,49 @@ func TestTop10(t *testing.T) {
 			require.ElementsMatch(t, expected, Top10(text))
 		}
 	})
+}
+
+func TestTop10Mini(t *testing.T) {
+	tests := []struct {
+		name     string
+		input    string
+		expected []string
+	}{
+		{
+			name:     "less then 10",
+			input:    `Good blood, bad blood.`,
+			expected: []string{"blood", "good", "bad"},
+		},
+		{
+			name:     "one letter",
+			input:    `w`,
+			expected: []string{"w"},
+		},
+		{
+			name:     "dash is not hyphen",
+			input:    `Тире - это знак препинания, но кто-то использует вместо него дефис.`,
+			expected: []string{"тире", "это", "знак", "препинания", "но", "кто-то", "использует", "вместо", "него", "дефис"},
+		},
+		{
+			name:     "number is word too",
+			input:    `1 января 1999 года - введение евро в безналичных расчётах.`,
+			expected: []string{"1", "января", "1999", "года", "введение", "евро", "в", "безналичных", "расчётах"},
+		},
+		{
+			name:     "a lot of special chars",
+			input:    `x² - x - 1 = 0`,
+			expected: []string{"x²", "x", "1", "0"},
+		},
+		{
+			name:  "only special chars",
+			input: `!@#$%^&*()_+`,
+		},
+	}
+
+	for _, tst := range tests {
+		tst := tst
+		t.Run(tst.name, func(t *testing.T) {
+			require.Equal(t, tst.expected, Top10(tst.input))
+		})
+	}
 }
