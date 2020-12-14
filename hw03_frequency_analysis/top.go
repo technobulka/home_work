@@ -47,15 +47,15 @@ func Top10(s string) []string {
 		return counter[i].Count > counter[j].Count
 	})
 
-	var result []string
 	var top = 10
-	for _, c := range counter {
-		result = append(result, c.Word)
-	}
-
 	if len(counter) < 10 {
 		top = len(counter)
 	}
 
-	return result[:top]
+	result := make([]string, top)
+	for i, c := range counter[:top] {
+		result[i] = c.Word
+	}
+
+	return result
 }

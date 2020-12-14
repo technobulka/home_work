@@ -91,8 +91,9 @@ func TestTop10Mini(t *testing.T) {
 			expected: []string{"x²", "x", "1", "0"},
 		},
 		{
-			name:  "only special chars",
-			input: `!@#$%^&*()_+`,
+			name:     "only special chars",
+			input:    `!@#$%^&*()_+`,
+			expected: []string{},
 		},
 	}
 
