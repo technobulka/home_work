@@ -95,6 +95,11 @@ func TestTop10Mini(t *testing.T) {
 			input:    `!@#$%^&*()_+`,
 			expected: []string{},
 		},
+		{
+			name:     "only digits",
+			input:    `123 456 789`,
+			expected: []string{"123", "456", "789"},
+		},
 	}
 
 	for _, tst := range tests {
