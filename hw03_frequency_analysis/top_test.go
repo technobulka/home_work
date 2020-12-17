@@ -105,7 +105,7 @@ func TestTop10Mini(t *testing.T) {
 	for _, tst := range tests {
 		tst := tst
 		t.Run(tst.name, func(t *testing.T) {
-			require.Equal(t, tst.expected, Top10(tst.input))
+			require.ElementsMatch(t, tst.expected, Top10(tst.input))
 		})
 	}
 }

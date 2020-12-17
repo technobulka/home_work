@@ -6,35 +6,42 @@ import (
 )
 
 type wordCount struct {
-	Word  string
-	Count int
+	word  string
+	count int
 }
 
-type wordFrequency []*wordCount
+type wordFrequency struct {
+	data []*wordCount
+}
 
 func (c *wordFrequency) count(word string) {
 	var incremented = false
 
-	for _, v := range *c {
-		if v.Word == word {
-			v.Count++
+	for _, v := range c.data {
+		if v.word == word {
+			v.count++
 			incremented = true
 		}
 	}
 
 	if !incremented {
-		*c = append(*c, &wordCount{Word: word, Count: 1})
+		c.data = append(c.data, &wordCount{word: word, count: 1})
 	}
+}
+
+func (c wordFrequency) less(i, j int) bool {
+	return c.data[i].count > c.data[j].count
+}
+
+func wordEdge(c rune) bool {
+	return c != 45 && !unicode.IsLetter(c) && !unicode.IsNumber(c)
 }
 
 func Top10(s string) []string {
 	s = strings.ToLower(s)
-	f := func(c rune) bool {
-		return c != 45 && !unicode.IsLetter(c) && !unicode.IsNumber(c)
-	}
 
 	var counter wordFrequency
-	for _, word := range strings.FieldsFunc(s, f) {
+	for _, word := range strings.FieldsFunc(s, wordEdge) {
 		// когда вместо тире используют дефис
 		if word == "-" {
 			continue
@@ -43,18 +50,16 @@ func Top10(s string) []string {
 		counter.count(word)
 	}
 
-	sort.Slice(counter, func(i, j int) bool {
-		return counter[i].Count > counter[j].Count
-	})
+	sort.Slice(counter.data, counter.less)
 
 	var top = 10
-	if len(counter) < 10 {
-		top = len(counter)
+	if len(counter.data) < 10 {
+		top = len(counter.data)
 	}
 
 	result := make([]string, top)
-	for i, c := range counter[:top] {
-		result[i] = c.Word
+	for i, c := range counter.data[:top] {
+		result[i] = c.word
 	}
 
 	return result
