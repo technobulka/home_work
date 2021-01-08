@@ -20,6 +20,18 @@ func TestCache(t *testing.T) {
 		require.False(t, ok)
 	})
 
+	t.Run("empty cache after actions", func(t *testing.T) {
+		c := NewCache(3)
+
+		wasInCache := c.Set("aaa", 100)
+		require.False(t, wasInCache)
+
+		c.Clear()
+
+		_, ok := c.Get("aaa")
+		require.False(t, ok)
+	})
+
 	t.Run("simple", func(t *testing.T) {
 		c := NewCache(5)
 
