@@ -21,9 +21,19 @@ type cacheItem struct {
 }
 
 func (c *lruCache) Set(key Key, value interface{}) bool {
-	if _, ok := c.items[key]; ok {
-		c.queue.MoveToFront(c.items[key].ptr)
-		c.items[key] = cacheItem{key, c.queue.Front(), value}
+	if item, ok := c.items[key]; ok {
+		if item.ptr != c.queue.Front() {
+			c.queue.MoveToFront(item.ptr)
+		}
+
+		if item.value != value {
+			c.items[key] = cacheItem{
+				key,
+				c.queue.Front(),
+				value,
+			}
+		}
+
 		return true
 	}
 
@@ -46,7 +56,7 @@ func (c *lruCache) Set(key Key, value interface{}) bool {
 
 func (c *lruCache) Get(key Key) (interface{}, bool) {
 	if item, ok := c.items[key]; ok {
-		c.queue.MoveToFront(c.items[key].ptr)
+		c.queue.MoveToFront(item.ptr)
 		return item.value, true
 	}
 
