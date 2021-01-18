@@ -100,6 +100,7 @@ func (l *list) MoveToFront(i *listItem) {
 	if i.prev != nil {
 		i.prev.next = i.next
 		i.next = l.front
+		l.front.prev = i
 	}
 
 	i.prev = nil
