@@ -123,7 +123,7 @@ func TestRun(t *testing.T) {
 		result := Run(tasks, workersCount, maxErrorsCount)
 
 		require.Equal(t, ErrErrorsLimitExceeded, result)
-		require.LessOrEqual(t, runTasksCount, int32(1), "too many tasks completed")
+		require.LessOrEqual(t, runTasksCount, int32(workersCount+1), "too many tasks completed")
 	})
 
 	t.Run("no tasks", func(t *testing.T) {
