@@ -13,13 +13,11 @@ type Task func() error
 func Run(tasks []Task, n int, m int) error {
 	var errCounter int32
 
+	ignoreErrors := m < 0
 	progress := make(chan Task, len(tasks))
-	for _, t := range tasks {
-		progress <- t
-	}
-	close(progress)
 
 	wg := sync.WaitGroup{}
+
 	for w := 0; w < n; w++ {
 		wg.Add(1)
 		go func() {
@@ -42,14 +40,15 @@ func Run(tasks []Task, n int, m int) error {
 			}
 		}()
 	}
+
+	for _, t := range tasks {
+		progress <- t
+	}
+	close(progress)
+
 	wg.Wait()
 
-	// all fine or ignore errors
-	if errCounter == 0 || m < 0 {
-		return nil
-	}
-
-	if m >= 0 && errCounter > int32(m) {
+	if !ignoreErrors && errCounter > 0 && errCounter >= int32(m) {
 		return ErrErrorsLimitExceeded
 	}
 
