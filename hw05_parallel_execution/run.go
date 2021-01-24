@@ -13,6 +13,10 @@ type Task func() error
 func Run(tasks []Task, N int, M int) error {
 	var errCounter int32
 
+	if M == 0 {
+		M = 1
+	}
+
 	progress := make(chan Task, len(tasks))
 	for _, t := range tasks {
 		progress <- t
@@ -20,15 +24,13 @@ func Run(tasks []Task, N int, M int) error {
 	close(progress)
 
 	wg := sync.WaitGroup{}
-
 	for w := 0; w < N; w++ {
 		wg.Add(1)
 		go func() {
 			defer wg.Done()
 
 			for {
-				if M == 0 && atomic.LoadInt32(&errCounter) > 0 ||
-					M > 0 && atomic.LoadInt32(&errCounter) >= int32(M) {
+				if M > 0 && atomic.LoadInt32(&errCounter) >= int32(M) {
 					return
 				}
 
@@ -44,7 +46,6 @@ func Run(tasks []Task, N int, M int) error {
 			}
 		}()
 	}
-
 	wg.Wait()
 
 	// all fine or ignore errors
@@ -52,8 +53,7 @@ func Run(tasks []Task, N int, M int) error {
 		return nil
 	}
 
-	if M == 0 && errCounter > 0 || // at least one error
-		M > 0 && errCounter >= int32(M) { // greater or equal errors
+	if M > 0 && errCounter >= int32(M) {
 		return ErrErrorsLimitExceeded
 	}
 
