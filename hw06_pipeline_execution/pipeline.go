@@ -36,7 +36,11 @@ func ExecutePipeline(in In, done In, stages ...Stage) Out {
 				defer close(*next)
 
 				for result := range do(chains[i]) {
-					*next <- result
+					select {
+					case <-done:
+						return
+					case *next <- result:
+					}
 				}
 			}(i, do)
 		}
