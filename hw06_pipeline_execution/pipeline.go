@@ -12,7 +12,7 @@ func ExecutePipeline(in In, done In, stages ...Stage) Out {
 	for _, stage := range stages {
 		out := make(Bi)
 
-		go func(in In, out Bi, stage Stage) {
+		go func(in In, out Bi) {
 			defer close(out)
 
 			for {
@@ -26,7 +26,7 @@ func ExecutePipeline(in In, done In, stages ...Stage) Out {
 					out <- val
 				}
 			}
-		}(in, out, stage)
+		}(in, out)
 
 		in = stage(out)
 	}
