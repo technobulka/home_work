@@ -13,6 +13,28 @@ var (
 	ErrOffsetExceedsFileSize = errors.New("offset exceeds file size")
 )
 
+func getSize(file *os.File, offset, limit int64) (int64, error) {
+	fileInfo, err := file.Stat()
+	if err != nil {
+		return 0, err
+	}
+
+	if fileInfo.IsDir() {
+		return 0, ErrUnsupportedFile
+	}
+
+	if fileInfo.Size() < offset {
+		return 0, ErrOffsetExceedsFileSize
+	}
+
+	_, err = file.Seek(offset, io.SeekStart)
+	if err != nil {
+		return 0, err
+	}
+
+	return fileInfo.Size(), nil
+}
+
 func Copy(fromPath, toPath string, offset, limit int64) error {
 	in, err := os.Open(fromPath)
 	if err != nil {
@@ -26,38 +48,25 @@ func Copy(fromPath, toPath string, offset, limit int64) error {
 	}
 	defer out.Close()
 
-	fileInfo, err := in.Stat()
-	if err != nil {
-		return err
-	}
-
-	if fileInfo.IsDir() {
-		return ErrUnsupportedFile
-	}
-
-	if fileInfo.Size() < offset {
-		return ErrOffsetExceedsFileSize
-	}
-
-	_, err = in.Seek(offset, io.SeekStart)
+	size, err := getSize(in, offset, limit)
 	if err != nil {
 		return err
 	}
 
 	if limit == 0 {
-		limit = fileInfo.Size() - offset
+		limit = size - offset
 	}
 
 	count := limit
-	if fileInfo.Size()-offset < limit {
-		count = fileInfo.Size() - offset
+	if size-offset < limit {
+		count = size - offset
 	}
 
 	bar := pb.Simple.Start64(count)
 	barReader := bar.NewProxyReader(in)
 
 	_, err = io.CopyN(out, barReader, limit)
-	if err != nil && err != io.EOF {
+	if err != nil && !errors.Is(err, io.EOF) {
 		return err
 	}
 

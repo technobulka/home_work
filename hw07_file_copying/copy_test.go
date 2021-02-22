@@ -1,6 +1,7 @@
 package main
 
 import (
+	"os"
 	"testing"
 
 	"github.com/stretchr/testify/require"
@@ -12,6 +13,7 @@ func TestCopy(t *testing.T) {
 		to := "out.txt"
 
 		err := Copy(from, to, 0, 0)
+		os.Remove(to)
 		require.Error(t, err)
 	})
 
@@ -20,6 +22,7 @@ func TestCopy(t *testing.T) {
 		to := "out.txt"
 
 		err := Copy(from, to, 0, 0)
+		os.Remove(to)
 		require.Error(t, err)
 	})
 
@@ -28,6 +31,7 @@ func TestCopy(t *testing.T) {
 		to := "out.txt"
 
 		err := Copy(from, to, 9000, 0)
+		os.Remove(to)
 		require.Error(t, err)
 	})
 }
