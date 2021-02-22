@@ -13,7 +13,7 @@ var (
 	ErrOffsetExceedsFileSize = errors.New("offset exceeds file size")
 )
 
-func getSize(file *os.File, offset, limit int64) (int64, error) {
+func getSize(file *os.File, offset int64) (int64, error) {
 	fileInfo, err := file.Stat()
 	if err != nil {
 		return 0, err
@@ -48,7 +48,7 @@ func Copy(fromPath, toPath string, offset, limit int64) error {
 	}
 	defer out.Close()
 
-	size, err := getSize(in, offset, limit)
+	size, err := getSize(in, offset)
 	if err != nil {
 		return err
 	}
