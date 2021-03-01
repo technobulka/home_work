@@ -45,8 +45,7 @@ func createTestFile(code string) {
 }
 
 func removeTestFile() {
-	err := os.Remove(testFile)
-	if err != nil {
+	if err := os.Remove(testFile); err != nil {
 		fmt.Println(err)
 	}
 }
