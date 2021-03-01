@@ -47,7 +47,7 @@ func ReadDir(dir string) (Environment, error) {
 }
 
 func getEnv(path string) (EnvValue, error) {
-	var env = EnvValue{}
+	env := EnvValue{}
 
 	file, err := os.Open(path)
 	if err != nil {

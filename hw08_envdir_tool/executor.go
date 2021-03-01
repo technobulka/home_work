@@ -38,7 +38,7 @@ func RunCmd(cmd []string, env Environment) (returnCode int) {
 		args = cmd[1:]
 	}
 
-	c := exec.Command(cmd[0], args...)
+	c := exec.Command(cmd[0], args...) //nolint:gosec
 	c.Stdin = os.Stdin
 	c.Stdout = os.Stdout
 	c.Stderr = os.Stderr
