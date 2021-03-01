@@ -2,7 +2,6 @@ package main
 
 import (
 	"errors"
-	"fmt"
 	"log"
 	"os"
 	"os/exec"
@@ -51,8 +50,6 @@ func RunCmd(cmd []string, env Environment) (returnCode int) {
 
 		return ExitCodeError
 	}
-
-	fmt.Println(os.Getenv("FOO"))
 
 	return ExitCodeOk
 }
