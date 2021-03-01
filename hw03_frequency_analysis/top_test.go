@@ -1,4 +1,4 @@
-package hw03_frequency_analysis //nolint:golint
+package hw03frequencyanalysis
 
 import (
 	"testing"
@@ -6,8 +6,8 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-// Change to true if needed
-var taskWithAsteriskIsCompleted = true
+// Change to true if needed.
+var taskWithAsteriskIsCompleted = false
 
 var text = `Как видите, он  спускается  по  лестнице  вслед  за  своим
 	другом   Кристофером   Робином,   головой   вниз,  пересчитывая
@@ -50,62 +50,33 @@ func TestTop10(t *testing.T) {
 
 	t.Run("positive test", func(t *testing.T) {
 		if taskWithAsteriskIsCompleted {
-			expected := []string{"он", "а", "и", "что", "ты", "не", "если", "то", "его", "кристофер", "робин", "в"}
-			require.Subset(t, expected, Top10(text))
+			expected := []string{
+				"а",         // 8
+				"он",        // 8
+				"и",         // 6
+				"ты",        // 5
+				"что",       // 5
+				"в",         // 4
+				"его",       // 4
+				"если",      // 4
+				"кристофер", // 4
+				"не",        // 4
+			}
+			require.Equal(t, expected, Top10(text))
 		} else {
-			expected := []string{"он", "и", "а", "что", "ты", "не", "если", "-", "то", "Кристофер"}
-			require.ElementsMatch(t, expected, Top10(text))
+			expected := []string{
+				"он",        // 8
+				"а",         // 6
+				"и",         // 6
+				"ты",        // 5
+				"что",       // 5
+				"-",         // 4
+				"Кристофер", // 4
+				"если",      // 4
+				"не",        // 4
+				"то",        // 4
+			}
+			require.Equal(t, expected, Top10(text))
 		}
 	})
-}
-
-func TestTop10Mini(t *testing.T) {
-	tests := []struct {
-		name     string
-		input    string
-		expected []string
-	}{
-		{
-			name:     "less then 10",
-			input:    `Good blood, bad blood.`,
-			expected: []string{"blood", "good", "bad"},
-		},
-		{
-			name:     "one letter",
-			input:    `w`,
-			expected: []string{"w"},
-		},
-		{
-			name:     "dash is not hyphen",
-			input:    `Тире - это знак препинания, но кто-то использует вместо него дефис.`,
-			expected: []string{"тире", "это", "знак", "препинания", "но", "кто-то", "использует", "вместо", "него", "дефис"},
-		},
-		{
-			name:     "number is word too",
-			input:    `1 января 1999 года - введение евро в безналичных расчётах.`,
-			expected: []string{"1", "января", "1999", "года", "введение", "евро", "в", "безналичных", "расчётах"},
-		},
-		{
-			name:     "a lot of special chars",
-			input:    `x² - x - 1 = 0`,
-			expected: []string{"x²", "x", "1", "0"},
-		},
-		{
-			name:     "only special chars",
-			input:    `!@#$%^&*()_+`,
-			expected: []string{},
-		},
-		{
-			name:     "only digits",
-			input:    `123 456 789`,
-			expected: []string{"123", "456", "789"},
-		},
-	}
-
-	for _, tst := range tests {
-		tst := tst
-		t.Run(tst.name, func(t *testing.T) {
-			require.ElementsMatch(t, tst.expected, Top10(tst.input))
-		})
-	}
 }

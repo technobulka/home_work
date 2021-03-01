@@ -1,198 +1,45 @@
-package hw02_unpack_string //nolint:golint,stylecheck
+package hw02unpackstring
 
 import (
+	"errors"
 	"testing"
 
 	"github.com/stretchr/testify/require"
 )
 
-type test struct {
-	input    string
-	expected string
-	err      error
-}
-
 func TestUnpack(t *testing.T) {
-	tests := []test{
-		{
-			input:    "a4bc2d5e",
-			expected: "aaaabccddddde",
-		},
-		{
-			input:    "abccd",
-			expected: "abccd",
-		},
-		{
-			input:    "3abc",
-			expected: "",
-			err:      ErrInvalidString,
-		},
-		{
-			input:    "45",
-			expected: "",
-			err:      ErrInvalidString,
-		},
-		{
-			input:    "aaa10b",
-			expected: "",
-			err:      ErrInvalidString,
-		},
-		{
-			input:    "",
-			expected: "",
-		},
-		{
-			input:    "aaa0b",
-			expected: "aab",
-		},
+	tests := []struct {
+		input    string
+		expected string
+	}{
+		{input: "a4bc2d5e", expected: "aaaabccddddde"},
+		{input: "abccd", expected: "abccd"},
+		{input: "", expected: ""},
+		{input: "aaa0b", expected: "aab"},
+		// uncomment if task with asterisk completed
+		// {input: `qwe\4\5`, expected: `qwe45`},
+		// {input: `qwe\45`, expected: `qwe44444`},
+		// {input: `qwe\\5`, expected: `qwe\\\\\`},
+		// {input: `qwe\\\3`, expected: `qwe\3`},
 	}
 
-	for _, tst := range tests {
-		tst := tst
-
-		t.Run(tst.input, func(t *testing.T) {
-			result, err := Unpack(tst.input)
-			require.Equal(t, tst.err, err)
-			require.Equal(t, tst.expected, result)
+	for _, tc := range tests {
+		tc := tc
+		t.Run(tc.input, func(t *testing.T) {
+			result, err := Unpack(tc.input)
+			require.NoError(t, err)
+			require.Equal(t, tc.expected, result)
 		})
 	}
 }
 
-func TestUnpackWithUpper(t *testing.T) {
-	tests := []test{
-		{
-			input:    "ASD",
-			expected: "ASD",
-		},
-		{
-			input:    "A3D0",
-			expected: "AAA",
-		},
-		{
-			input:    "3A",
-			expected: "",
-			err:      ErrInvalidString,
-		},
-		{
-			input:    "SSS3S",
-			expected: "SSSSSS",
-		},
-	}
-
-	for _, tst := range tests {
-		tst := tst
-		t.Run(tst.input, func(t *testing.T) {
-			result, err := Unpack(tst.input)
-			require.Equal(t, tst.err, err)
-			require.Equal(t, tst.expected, result)
-		})
-	}
-}
-
-func TestUnpackWithSpecialChars(t *testing.T) {
-	tests := []test{
-		{
-			input:    `a\`,
-			expected: "a",
-		},
-		{
-			input:    `\\3`,
-			expected: `\\\`,
-		},
-		{
-			input:    "a\n3abc",
-			expected: "a\n\n\nabc",
-		},
-		{
-			input:    "a\t2b",
-			expected: "a\t\tb",
-		},
-		{
-			input:    "³3",
-			expected: "³³³",
-		},
-		{
-			input:    "#16",
-			expected: "",
-			err:      ErrInvalidString,
-		},
-		{
-			input:    "=8=8",
-			expected: "================",
-		},
-	}
-
-	for _, tst := range tests {
-		tst := tst
-		t.Run(tst.input, func(t *testing.T) {
-			result, err := Unpack(tst.input)
-			require.Equal(t, tst.err, err)
-			require.Equal(t, tst.expected, result)
-		})
-	}
-}
-
-func TestUnpackWithLanguages(t *testing.T) {
-	tests := []test{
-		{
-			input:    "山3",
-			expected: "山山山",
-		},
-		{
-			input:    "montañ3a0",
-			expected: "montañññ",
-		},
-		{
-			input:    "جبل4",
-			expected: "جبلللل",
-		},
-		{
-			input:    "ภูเขา2",
-			expected: "ภูเขาา",
-		},
-	}
-
-	for _, tst := range tests {
-		tst := tst
-		t.Run(tst.input, func(t *testing.T) {
-			result, err := Unpack(tst.input)
-			require.Equal(t, tst.err, err)
-			require.Equal(t, tst.expected, result)
-		})
-	}
-}
-
-func TestUnpackWithEscape(t *testing.T) {
-	tests := []test{
-		{
-			input:    `qwe\4\5`,
-			expected: `qwe45`,
-		},
-		{
-			input:    `qwe\45`,
-			expected: `qwe44444`,
-		},
-		{
-			input:    `qwe\\5`,
-			expected: `qwe\\\\\`,
-		},
-		{
-			input:    `qwe\\\3`,
-			expected: `qwe\3`,
-		},
-		{
-			input:    `qw\ne`,
-			expected: "",
-			err:      ErrInvalidString,
-		},
-	}
-
-	for _, tst := range tests {
-		tst := tst
-		t.Run(tst.input, func(t *testing.T) {
-			result, err := Unpack(tst.input)
-			require.Equal(t, tst.err, err)
-			require.Equal(t, tst.expected, result)
+func TestUnpackInvalidString(t *testing.T) {
+	invalidStrings := []string{"3abc", "45", "aaa10b"}
+	for _, tc := range invalidStrings {
+		tc := tc
+		t.Run(tc, func(t *testing.T) {
+			_, err := Unpack(tc)
+			require.Truef(t, errors.Is(err, ErrInvalidString), "actual error %q", err)
 		})
 	}
 }

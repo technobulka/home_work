@@ -1,4 +1,4 @@
-package hw04_lru_cache //nolint:golint,stylecheck
+package hw04lrucache
 
 import (
 	"testing"
@@ -15,31 +15,6 @@ func TestList(t *testing.T) {
 		require.Nil(t, l.Back())
 	})
 
-	t.Run("empty list after actions", func(t *testing.T) {
-		l := NewList()
-
-		l.PushFront(100)
-		l.Remove(l.Front())
-
-		require.Equal(t, 0, l.Len())
-		require.Nil(t, l.Front())
-		require.Nil(t, l.Back())
-
-		l.PushBack(100)
-		l.PushFront(200)
-		l.PushBack(300)
-		l.PushFront(400)
-
-		l.Remove(l.Front())
-		l.Remove(l.Back())
-		l.Remove(l.Front())
-		l.Remove(l.Back())
-
-		require.Equal(t, 0, l.Len())
-		require.Nil(t, l.Front())
-		require.Nil(t, l.Back())
-	})
-
 	t.Run("complex", func(t *testing.T) {
 		l := NewList()
 
@@ -48,7 +23,7 @@ func TestList(t *testing.T) {
 		l.PushBack(30)  // [10, 20, 30]
 		require.Equal(t, 3, l.Len())
 
-		middle := l.Front().next // 20
+		middle := l.Front().Next // 20
 		l.Remove(middle)         // [10, 30]
 		require.Equal(t, 2, l.Len())
 
@@ -61,15 +36,15 @@ func TestList(t *testing.T) {
 		} // [80, 60, 40, 10, 30, 50, 70]
 
 		require.Equal(t, 7, l.Len())
-		require.Equal(t, 80, l.Front().value)
-		require.Equal(t, 70, l.Back().value)
+		require.Equal(t, 80, l.Front().Value)
+		require.Equal(t, 70, l.Back().Value)
 
 		l.MoveToFront(l.Front()) // [80, 60, 40, 10, 30, 50, 70]
 		l.MoveToFront(l.Back())  // [70, 80, 60, 40, 10, 30, 50]
 
 		elems := make([]int, 0, l.Len())
-		for i := l.Front(); i != nil; i = i.next {
-			elems = append(elems, i.value.(int))
+		for i := l.Front(); i != nil; i = i.Next {
+			elems = append(elems, i.Value.(int))
 		}
 		require.Equal(t, []int{70, 80, 60, 40, 10, 30, 50}, elems)
 	})

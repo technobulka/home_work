@@ -1,4 +1,4 @@
-package hw04_lru_cache //nolint:golint,stylecheck
+package hw04lrucache
 
 import (
 	"math/rand"
@@ -17,18 +17,6 @@ func TestCache(t *testing.T) {
 		require.False(t, ok)
 
 		_, ok = c.Get("bbb")
-		require.False(t, ok)
-	})
-
-	t.Run("empty cache after actions", func(t *testing.T) {
-		c := NewCache(3)
-
-		wasInCache := c.Set("aaa", 100)
-		require.False(t, wasInCache)
-
-		c.Clear()
-
-		_, ok := c.Get("aaa")
 		require.False(t, ok)
 	})
 
@@ -62,46 +50,12 @@ func TestCache(t *testing.T) {
 	})
 
 	t.Run("purge logic", func(t *testing.T) {
-		c := NewCache(3)
-
-		c.Set("a", 100)
-		c.Set("b", 200)
-		c.Set("c", 300)
-		c.Set("d", 999)
-
-		val, ok := c.Get("a")
-		require.False(t, ok)
-		require.Nil(t, val)
-
-		c.Set("b", 500)
-		c.Set("c", 600)
-		c.Set("b", 700)
-		c.Set("c", 800)
-		c.Set("b", 900)
-
-		c.Set("f", 999)
-
-		val, ok = c.Get("d")
-		require.False(t, ok)
-		require.Nil(t, val)
-
-		c.Clear()
-		c.Set("a", 100)
-		c.Set("b", 200)
-		c.Set("c", 300)
-		c.Set("a", 400)
-		c.Set("a", 500)
-		c.Set("a", 600)
-		c.Set("d", 999)
-
-		val, ok = c.Get("b")
-		require.False(t, ok)
-		require.Nil(t, val)
+		// Write me
 	})
 }
 
 func TestCacheMultithreading(t *testing.T) {
-	t.Skip() // NeedRemove if task with asterisk completed
+	t.Skip() // Remove me if task with asterisk completed.
 
 	c := NewCache(10)
 	wg := &sync.WaitGroup{}
