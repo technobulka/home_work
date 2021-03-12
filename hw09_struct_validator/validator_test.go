@@ -11,7 +11,7 @@ type UserRole string
 // Test the function on different structures and other types.
 type (
 	User struct {
-		ID     string `json:"id" validate:"len:36"`
+		ID     string `json:"id" validate:"len:32"`
 		Name   string
 		Age    int      `validate:"min:18|max:50"`
 		Email  string   `validate:"regexp:^\\w+@\\w+\\.\\w+$"`
@@ -22,6 +22,11 @@ type (
 
 	App struct {
 		Version string `validate:"len:5"`
+	}
+
+	Post struct {
+		User User
+		App  App
 	}
 
 	Token struct {
@@ -42,10 +47,40 @@ func TestValidate(t *testing.T) {
 		expectedErr error
 	}{
 		{
-			// Place your code here.
+			App{"1.0.0"},
+			nil,
 		},
-		// ...
-		// Place your code here.
+		{
+			App{"11.0.0"},
+			fmt.Errorf("not valid"),
+		},
+		{
+			User{
+				ID:     "5d41402abc4b2a76b9719d911017c592",
+				Name:   "Tester",
+				Age:    25,
+				Email:  "tester@test.com",
+				Role:   "stuff",
+				Phones: []string{"01234567890"},
+				meta:   nil,
+			},
+			nil,
+		},
+		{
+			Post{
+				User{
+					ID:     "5d41402abc4b2a76b9719d911017c592",
+					Name:   "Tester",
+					Age:    25,
+					Email:  "tester@test.com",
+					Role:   "stuff",
+					Phones: []string{"01234567890"},
+					meta:   nil,
+				},
+				App{"1.0.0"},
+			},
+			nil,
+		},
 	}
 
 	for i, tt := range tests {
@@ -53,7 +88,7 @@ func TestValidate(t *testing.T) {
 			tt := tt
 			t.Parallel()
 
-			// Place your code here.
+			_ = Validate(tt.in)
 			_ = tt
 		})
 	}
