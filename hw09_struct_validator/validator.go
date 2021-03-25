@@ -1,6 +1,7 @@
 package hw09structvalidator
 
 import (
+	"errors"
 	"fmt"
 	"reflect"
 )
@@ -13,48 +14,72 @@ type ValidationError struct {
 type ValidationErrors []ValidationError
 
 func (v ValidationErrors) Error() string {
-	panic("implement me")
+	var errString string
+
+	for _, err := range v {
+		errString += fmt.Sprintf("%s: %s\n", err.Err.Error(), err.Field)
+	}
+
+	return errString
 }
 
 func Validate(v interface{}) error {
 	rv := reflect.ValueOf(v)
 
-	for i := 0; i < rv.NumField(); i++ {
-		field := rv.Type().Field(i)
-		//var fieldPath string
-		//if currentPath == "" {
-		//	fieldPath = field.Name
-		//} else {
-		//	fieldPath = currentPath + "." + field.Name
-		//}
-		//if field.Type.Kind() == reflect.Struct {
-		//	validateFields(rv.Field(i).Interface(), fieldPath, errs)
-		//	continue
-		//}
-
-		if field.Type.Kind() == reflect.Struct {
-			_ = validateStruct(rv.Field(i).Interface())
-			continue
-		}
-
-		if validate, ok := field.Tag.Lookup("validate"); ok {
-			fmt.Println(validate)
-		}
+	if rv.Kind() != reflect.Struct {
+		return errors.New("not struct")
 	}
 
-	return nil
+	rt := reflect.TypeOf(v)
+	path := rt.Name()
+	var errList ValidationErrors
+	validateStruct(v, &path, &errList)
+
+	return errList
 }
 
-func validateStruct(s interface{}) error {
+func validateStruct(s interface{}, path *string, errList *ValidationErrors) {
 	v := reflect.ValueOf(s)
 
 	for i := 0; i < v.NumField(); i++ {
 		field := v.Type().Field(i)
+		fieldPath := *path + "." + field.Name
 
-		if validate, ok := field.Tag.Lookup("validate"); ok {
-			fmt.Println(validate)
+		if field.Type.Kind() == reflect.Struct {
+			rule, ok := field.Tag.Lookup("validate")
+			if ok && rule == "nested" {
+				validateStruct(v.Field(i).Interface(), &fieldPath, errList)
+			}
+
+			continue
+		}
+
+		if rules, ok := field.Tag.Lookup("validate"); ok {
+			err := validateField(v.Field(i), rules)
+
+			if err != nil {
+				*errList = append(*errList, ValidationError{
+					Field: fieldPath,
+					Err:   err,
+				})
+			}
 		}
 	}
+}
 
-	return nil
+func validateField(field reflect.Value, rules string) error {
+	var err error
+
+	switch kind := field.Kind(); {
+	case kind == reflect.String:
+		err = validateString(field, rules)
+	case kind == reflect.Slice:
+		err = validateSlice(field, rules)
+	case kind >= reflect.Int && kind <= reflect.Uint64:
+		err = validateInt(field, rules)
+	default:
+		return errors.New("not supported")
+	}
+
+	return err
 }
