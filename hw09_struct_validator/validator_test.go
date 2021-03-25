@@ -3,8 +3,9 @@ package hw09structvalidator
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/stretchr/testify/require"
 	"testing"
+
+	"github.com/stretchr/testify/require"
 )
 
 type UserRole string

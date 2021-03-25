@@ -56,7 +56,6 @@ func validateStruct(s interface{}, path *string, errList *ValidationErrors) {
 
 		if rules, ok := field.Tag.Lookup("validate"); ok {
 			err := validateField(v.Field(i), rules)
-
 			if err != nil {
 				*errList = append(*errList, ValidationError{
 					Field: fieldPath,

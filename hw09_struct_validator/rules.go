@@ -101,7 +101,6 @@ func validateSlice(value reflect.Value, rulesString string) error {
 
 func ruleLen(value reflect.Value, length string) error {
 	l, err := strconv.Atoi(length)
-
 	if err != nil {
 		return invalidRule("len:" + length)
 	}
@@ -115,7 +114,6 @@ func ruleLen(value reflect.Value, length string) error {
 
 func ruleRegexp(value reflect.Value, re string) error {
 	regExp, err := regexp.Compile(re)
-
 	if err != nil {
 		return invalidRule("regexp:" + re)
 	}
@@ -229,7 +227,6 @@ func ruleMax(value reflect.Value, max string) error {
 
 func comparisonInt(value int64, target string, direction string) (bool, error) {
 	compared, err := strconv.ParseInt(target, 10, 64)
-
 	if err != nil {
 		return false, invalidRule(direction + ":" + target)
 	}
@@ -246,7 +243,6 @@ func comparisonInt(value int64, target string, direction string) (bool, error) {
 
 func comparisonUint(value uint64, target string, direction string) (bool, error) {
 	compared, err := strconv.ParseUint(target, 10, 64)
-
 	if err != nil {
 		return false, invalidRule(direction + ":" + target)
 	}
