@@ -7,8 +7,10 @@ import (
 	"strings"
 )
 
-var ErrNotStruct = errors.New("not struct")
-var ErrTypeNotSupported = errors.New("type not supported")
+var (
+	ErrNotStruct        = errors.New("not struct")
+	ErrTypeNotSupported = errors.New("type not supported")
+)
 
 type ValidationError struct {
 	Field string
