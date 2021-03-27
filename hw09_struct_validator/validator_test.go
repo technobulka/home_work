@@ -49,7 +49,7 @@ func TestValidate(t *testing.T) {
 		{
 			"not struct",
 			1,
-			fmt.Errorf("not struct"),
+			ErrNotStruct,
 		},
 		{
 			"simple no errors",
