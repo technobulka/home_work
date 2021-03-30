@@ -6,7 +6,19 @@ import (
 	"fmt"
 	"io"
 	"strings"
+
+	jsoniter "github.com/json-iterator/go"
 )
+
+type User struct {
+	ID       int
+	Name     string
+	Username string
+	Email    string
+	Phone    string
+	Password string
+	Address  string
+}
 
 type DomainStat map[string]int
 
@@ -19,10 +31,10 @@ func GetDomainStat(r io.Reader, domain string) (DomainStat, error) {
 }
 
 func countDomains(r io.Reader, domain string) (DomainStat, error) {
+	json := jsoniter.ConfigCompatibleWithStandardLibrary
 	result := make(DomainStat)
 	domain = "." + domain
-	var userLine string
-	var etIdx, quoteIdx int
+	var user User
 
 	br := bufio.NewReader(r)
 	for {
@@ -34,13 +46,13 @@ func countDomains(r io.Reader, domain string) (DomainStat, error) {
 			return nil, err
 		}
 
-		userLine = string(line)
-		etIdx = strings.Index(userLine, "@")
-		quoteIdx = strings.Index(userLine[etIdx:], `"`)
-		userDomain := strings.ToLower(userLine[etIdx+1 : etIdx+quoteIdx])
+		err = json.Unmarshal(line, &user)
+		if err != nil {
+			return nil, err
+		}
 
-		if strings.HasSuffix(userDomain, domain) {
-			result[userDomain]++
+		if strings.HasSuffix(user.Email, domain) {
+			result[strings.ToLower(strings.SplitN(user.Email, "@", 2)[1])]++
 		}
 	}
 
