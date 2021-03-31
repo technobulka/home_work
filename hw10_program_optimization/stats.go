@@ -11,13 +11,7 @@ import (
 )
 
 type User struct {
-	ID       int    `json:"-"`
-	Name     string `json:"-"`
-	Username string `json:"-"`
-	Email    string `json:"Email"`
-	Phone    string `json:"-"`
-	Password string `json:"-"`
-	Address  string `json:"-"`
+	Email string
 }
 
 type DomainStat map[string]int
@@ -52,7 +46,7 @@ func countDomains(r io.Reader, domain string) (DomainStat, error) {
 			return nil, err
 		}
 
-		if strings.HasSuffix(user.Email, domain) {
+		if strings.HasSuffix(user.Email, domain) && strings.Contains(user.Email, "@") {
 			result[strings.ToLower(strings.SplitN(user.Email, "@", 2)[1])]++
 		}
 	}
