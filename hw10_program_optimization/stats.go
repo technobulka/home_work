@@ -31,7 +31,6 @@ func countDomains(r io.Reader, domain string) (DomainStat, error) {
 
 	json := jsoniter.ConfigCompatibleWithStandardLibrary
 	result := make(DomainStat)
-	domain = "." + domain
 
 	br := bufio.NewReader(r)
 	for {
