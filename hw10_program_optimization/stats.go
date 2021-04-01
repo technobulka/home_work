@@ -25,14 +25,17 @@ func GetDomainStat(r io.Reader, domain string) (DomainStat, error) {
 }
 
 func countDomains(r io.Reader, domain string) (DomainStat, error) {
+	var user User
+	var line []byte
+	var err error
+
 	json := jsoniter.ConfigCompatibleWithStandardLibrary
 	result := make(DomainStat)
 	domain = "." + domain
-	var user User
 
 	br := bufio.NewReader(r)
 	for {
-		line, _, err := br.ReadLine()
+		line, _, err = br.ReadLine()
 		if err != nil {
 			if errors.Is(err, io.EOF) {
 				break
@@ -40,13 +43,13 @@ func countDomains(r io.Reader, domain string) (DomainStat, error) {
 			return nil, err
 		}
 
-		user = User{}
 		err = json.Unmarshal(line, &user)
 		if err != nil {
 			return nil, err
 		}
 
-		if strings.HasSuffix(user.Email, domain) && strings.Contains(user.Email, "@") {
+		if strings.HasSuffix(user.Email, domain) &&
+			strings.Contains(user.Email, "@") {
 			result[strings.ToLower(strings.SplitN(user.Email, "@", 2)[1])]++
 		}
 	}
