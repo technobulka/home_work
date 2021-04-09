@@ -1,11 +1,14 @@
 package main
 
 import (
-	"context"
+	"bufio"
 	"flag"
+	"io"
 	"log"
 	"net"
 	"os"
+	"os/signal"
+	"syscall"
 	"time"
 )
 
@@ -17,92 +20,78 @@ func init() {
 
 func main() {
 	flag.Parse()
-	host := flag.Arg(0)
-	port := flag.Arg(1)
-
 	if len(flag.Args()) < 2 {
 		log.Fatal("usage: go-telnet [--timeout=10s] host port")
 	}
-
 	log.SetOutput(os.Stderr)
 
-	addr := net.JoinHostPort(host, port)
-	client := NewTelnetClient(addr, timeout, os.Stdin, os.Stdout)
+	shutdown := make(chan bool, 2)
+	pr, pw := io.Pipe()
+	go handleInput(pw, shutdown)
+
+	addr := net.JoinHostPort(flag.Arg(0), flag.Arg(1))
+	client := NewTelnetClient(addr, timeout, pr, os.Stdout)
 	err := client.Connect()
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	ctx, cancel := context.WithCancel(context.Background())
-	handleConnection(ctx, client)
+	log.Println("Connected to", addr)
+	go receiveRoutine(client, shutdown)
+	go sendRoutine(client, shutdown)
+	handleInterrupt(client, shutdown)
+}
 
-	go readRoutine(ctx, client, cancel)
-	go writeRoutine(ctx, client, cancel)
-
-	err = client.Close()
-	if err != nil {
-		log.Fatal(err)
+func handleInput(w io.Writer, shutdown chan bool) {
+	input := bufio.NewScanner(os.Stdin)
+	for input.Scan() {
+		_, err := w.Write([]byte(input.Text() + "\n"))
+		if err != nil {
+			log.Println(err)
+			shutdown <- true
+			return
+		}
 	}
 
-	log.Println("close telnet client")
+	if err := input.Err(); err != nil {
+		log.Println(err)
+		shutdown <- true
+		return
+	}
+
+	shutdown <- true
+}
+
+func receiveRoutine(client TelnetClient, shutdown chan bool) {
+	if err := client.Receive(); err != nil {
+		log.Println("error in receiving:", err)
+		shutdown <- true
+	}
+}
+
+func sendRoutine(client TelnetClient, shutdown chan bool) {
+	if err := client.Send(); err != nil {
+		log.Println("error in sending:", err)
+		shutdown <- true
+	}
+}
+
+func handleInterrupt(client TelnetClient, shutdown chan bool) {
+	signalCh := make(chan os.Signal, 1)
+	defer close(signalCh)
+
+	signal.Notify(signalCh, syscall.SIGINT, syscall.SIGTERM)
+	defer signal.Stop(signalCh)
+
+	select {
+	case s := <-signalCh:
+		log.Println("received:", s)
+	case <-shutdown:
+	}
+
 	if err := client.Close(); err != nil {
-		log.Fatal(err)
+		log.Println(err)
 	}
 
-	log.Println("Bye, client!")
-}
-
-func handleConnection(ctx context.Context, client TelnetClient) {
-	defer client.Close()
-	//client.Write([]byte(fmt.Sprintf("Welcome to %s, friend from %s\n", conn.LocalAddr(), conn.RemoteAddr())))
-
-	//scanner := bufio.NewScanner(conn)
-	//for scanner.Scan() {
-	//	text := scanner.Text()
-	//	log.Printf("RECEIVED: %s", text)
-	//	if text == "quit" || text == "exit" {
-	//		break
-	//	}
-	//
-	//	conn.Write([]byte(fmt.Sprintf("I have received '%s'\n", text)))
-	//}
-	//
-	//if err := scanner.Err(); err != nil {
-	//	log.Printf("Error happend on connection with %s: %v", conn.RemoteAddr(), err)
-	//}
-	//
-	//log.Printf("Closing connection with %s", conn.RemoteAddr())
-
-}
-
-func readRoutine(ctx context.Context, client TelnetClient, cancelFunc context.CancelFunc) {
-	for {
-		select {
-		case <-ctx.Done():
-			cancelFunc()
-			return
-		default:
-			if err := client.Receive(); err != nil {
-				log.Println("Receive error:", err)
-				cancelFunc()
-				return
-			}
-		}
-	}
-}
-
-func writeRoutine(ctx context.Context, client TelnetClient, cancelFunc context.CancelFunc) {
-	for {
-		select {
-		case <-ctx.Done():
-			cancelFunc()
-			return
-		default:
-			if err := client.Send(); err != nil {
-				log.Println("Send error:", err)
-				cancelFunc()
-				return
-			}
-		}
-	}
+	log.Println("Connection was closed")
 }
