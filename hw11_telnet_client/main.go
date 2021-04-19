@@ -19,20 +19,20 @@ func init() {
 }
 
 func main() {
+	log.SetOutput(os.Stderr)
+
 	flag.Parse()
 	if len(flag.Args()) < 2 {
 		log.Fatal("usage: go-telnet [--timeout=10s] host port")
 	}
-	log.SetOutput(os.Stderr)
 
 	shutdown := make(chan bool, 2)
 	pr, pw := io.Pipe()
-	go handleInput(pw, shutdown)
+	go handleInput(*pw, shutdown)
 
 	addr := net.JoinHostPort(flag.Arg(0), flag.Arg(1))
 	client := NewTelnetClient(addr, timeout, pr, os.Stdout)
-	err := client.Connect()
-	if err != nil {
+	if err := client.Connect(); err != nil {
 		log.Fatal(err)
 	}
 
@@ -42,7 +42,13 @@ func main() {
 	handleInterrupt(client, shutdown)
 }
 
-func handleInput(w io.Writer, shutdown chan bool) {
+func handleInput(w io.PipeWriter, shutdown chan bool) {
+	defer func() {
+		if err := w.Close(); err != nil {
+			log.Fatal(err)
+		}
+	}()
+
 	input := bufio.NewScanner(os.Stdin)
 	for input.Scan() {
 		_, err := w.Write([]byte(input.Text() + "\n"))
